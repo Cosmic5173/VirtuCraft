@@ -29,6 +29,7 @@ public final class Server {
     private final Path dataPath;
     private final Path pluginPath;
 
+    @Getter
     private final MainLogger logger;
 
     private boolean shutdown = false;
