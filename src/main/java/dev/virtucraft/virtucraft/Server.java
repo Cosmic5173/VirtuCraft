@@ -26,7 +26,9 @@ public final class Server {
     @Getter
     private static Server instance;
 
+    @Getter
     private final Path dataPath;
+    @Getter
     private final Path pluginPath;
 
     @Getter
