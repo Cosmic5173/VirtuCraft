@@ -17,6 +17,8 @@ package dev.virtucraft.virtucraft;
 
 import dev.virtucraft.virtucraft.logger.MainLogger;
 import dev.virtucraft.virtucraft.utils.config.ConfigurationManager;
+import dev.virtucraft.virtucraft.utils.config.LangConfig;
+import dev.virtucraft.virtucraft.utils.config.ServerConfig;
 import lombok.Getter;
 
 import java.nio.file.Path;
@@ -69,6 +71,14 @@ public final class Server {
 
     private void shutdown0() throws Exception {
 
+    }
+
+    public ServerConfig getConfiguration() {
+        return this.configurationManager.getServerConfig();
+    }
+
+    public LangConfig getLanguageConfig() {
+        return this.configurationManager.getLangConfig();
     }
 
     public boolean isRunning() {
