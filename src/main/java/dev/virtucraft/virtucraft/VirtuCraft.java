@@ -15,6 +15,8 @@
 
 package dev.virtucraft.virtucraft;
 
+import dev.virtucraft.virtucraft.logger.MainLogger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -28,24 +30,26 @@ public final class VirtuCraft {
     public static void main(String[] args) {
         Thread.currentThread().setName("VirtuCraft-main");
         System.out.println("Starting VirtuCraft...");
+        System.setProperty("log4j.skipJansi", "false");
 
-        System.out.println("Starting VirtuCraft server  software!");
-        System.out.println("Software Version: " + versionInfo.baseVersion());
-        System.out.println("Software Build: " + versionInfo.buildVersion());
-        System.out.println("Development Build: " + versionInfo.debug());
-        System.out.println("Software Authors: " + versionInfo.author());
+        var logger = MainLogger.getLogger();
+        logger.info("Starting VirtuCraft server  software!");
+        logger.info("Software Version: " + versionInfo.baseVersion());
+        logger.info("Software Build: " + versionInfo.buildVersion());
+        logger.info("Development Build: " + versionInfo.debug());
+        logger.info("Software Authors: " + versionInfo.author());
 
         var javaVersion = getJavaVersion();
         if (javaVersion < 17) {
-            System.out.println("VirtuCraft requires Java 17 or higher to run!");
-            System.out.println("Please update your Java version.");
+            logger.error("VirtuCraft requires Java 17 or higher to run!");
+            logger.error("Please update your Java version.");
             return;
         }
 
         if (versionInfo.buildVersion().equals("#build") || versionInfo.branchName().equals("unknown")) {
-            System.out.println("Custom build? Unofficial builds should be not run in production!");
+            logger.warning("Custom build? Unofficial builds should be not run in production!");
         } else {
-            System.out.println("Discovered branch " + versionInfo.branchName() + " commitId " + versionInfo.commitId());
+            logger.info("Discovered branch " + versionInfo.branchName() + " commitId " + versionInfo.commitId());
         }
     }
 
