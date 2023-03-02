@@ -56,6 +56,13 @@ public final class VirtuCraft {
         } else {
             logger.info("Discovered branch " + versionInfo.branchName() + " commitId " + versionInfo.commitId());
         }
+
+        try {
+            new Server(logger, DATA_PATH, PLUGIN_PATH);
+        } catch (Exception e) {
+            logger.logException(e);
+            onShutdown();
+        }
     }
 
     private static void onShutdown() {
