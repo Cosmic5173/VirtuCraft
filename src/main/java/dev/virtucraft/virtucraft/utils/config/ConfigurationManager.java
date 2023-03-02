@@ -16,11 +16,13 @@
 package dev.virtucraft.virtucraft.utils.config;
 
 import dev.virtucraft.virtucraft.Server;
+import dev.virtucraft.virtucraft.utils.FileUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 @Getter
@@ -28,6 +30,7 @@ public final class ConfigurationManager {
 
     private final Server server;
     private ServerConfig serverConfig;
+    private LangConfig langConfig;
 
     public ConfigurationManager(Server server) {
         this.server = server;
@@ -38,6 +41,20 @@ public final class ConfigurationManager {
         var config = new ServerConfig(configFile);
         config.init();
         this.serverConfig = config;
+    }
+
+    // TODO: Multiple language support.
+    // This is just a temporary solution for now so we can get the server up and running.
+    public void loadLanguageConfig() {
+        var langFile = new File(this.server.getDataPath().toString() + "/lang.ini");
+        if (!langFile.exists()) {
+            try {
+                FileUtils.saveFromResources("lang.ini", langFile);
+            } catch (IOException e) {
+                this.server.getLogger().error("Can not save lang file!", e);
+            }
+        }
+        this.langConfig = new LangConfig(langFile);
     }
 
     @AllArgsConstructor

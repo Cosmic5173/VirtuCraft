@@ -48,6 +48,7 @@ public final class Server {
 
         this.configurationManager = new ConfigurationManager(this);
         this.configurationManager.loadServerConfig();
+        this.configurationManager.loadLanguageConfig();
     }
 
     public void shutdown() {
