@@ -18,16 +18,26 @@ package dev.virtucraft.virtucraft.utils.config;
 import dev.virtucraft.virtucraft.Server;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.cubespace.Yamler.Config.InvalidConfigurationException;
 
+import java.io.File;
 import java.util.Arrays;
 
 @Getter
 public final class ConfigurationManager {
 
     private final Server server;
+    private ServerConfig serverConfig;
 
     public ConfigurationManager(Server server) {
         this.server = server;
+    }
+
+    public void loadServerConfig() throws InvalidConfigurationException {
+        var configFile = new File(this.server.getDataPath().toString() + "/config.yml");
+        var config = new ServerConfig(configFile);
+        config.init();
+        this.serverConfig = config;
     }
 
     @AllArgsConstructor

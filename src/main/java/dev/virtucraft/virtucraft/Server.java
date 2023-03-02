@@ -40,13 +40,14 @@ public final class Server {
 
     private boolean shutdown = false;
 
-    public Server(MainLogger logger, String filePath, String pluginPath) {
+    public Server(MainLogger logger, String filePath, String pluginPath) throws Exception {
         instance = this;
         this.logger = logger;
         this.dataPath = Paths.get(filePath);
         this.pluginPath = Paths.get(pluginPath);
 
         this.configurationManager = new ConfigurationManager(this);
+        this.configurationManager.loadServerConfig();
     }
 
     public void shutdown() {
