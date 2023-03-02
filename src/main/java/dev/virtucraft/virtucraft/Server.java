@@ -31,10 +31,16 @@ public final class Server {
 
     private final MainLogger logger;
 
+    private boolean shutdown = false;
+
     public Server(MainLogger logger, String filePath, String pluginPath) {
         instance = this;
         this.logger = logger;
         this.dataPath = Paths.get(filePath);
         this.pluginPath = Paths.get(pluginPath);
+    }
+
+    public boolean isRunning() {
+        return !shutdown;
     }
 }
