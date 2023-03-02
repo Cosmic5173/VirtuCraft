@@ -15,6 +15,8 @@
 
 package dev.virtucraft.virtucraft;
 
+import org.apache.logging.log4j.Level;
+
 public class VersionInfo {
 
     public static final boolean DEFAULT_DEBUG = true;
@@ -57,7 +59,12 @@ public class VersionInfo {
         return this.commitId;
     }
 
-    //TODO: Debug
+    public void debug(boolean debug) {
+        if (debug) {
+            VirtuCraft.setLoggerLevel(Level.DEBUG);
+        }
+        this.debug = debug;
+    }
 
     public boolean debug() {
         return this.debug;

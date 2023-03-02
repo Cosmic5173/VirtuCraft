@@ -16,6 +16,11 @@
 package dev.virtucraft.virtucraft;
 
 import dev.virtucraft.virtucraft.logger.MainLogger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,8 +58,8 @@ public final class VirtuCraft {
         }
     }
 
-    private void onShutdown() {
-
+    private static void onShutdown() {
+        LogManager.shutdown();
     }
 
     private static VersionInfo loadVersion() {
@@ -74,6 +79,14 @@ public final class VirtuCraft {
         String commitId = properties.getProperty("git.commit.id.abbrev", "unknown");
         boolean debug = !branchName.equals("release") && VersionInfo.DEFAULT_DEBUG;
         return new VersionInfo(branchName, commitId, debug);
+    }
+
+    public static void setLoggerLevel(Level level) {
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
+        Configuration log4jConfig = context.getConfiguration();
+        LoggerConfig loggerConfig = log4jConfig.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+        loggerConfig.setLevel(level);
+        context.updateLoggers();
     }
 
     public static VersionInfo version() {
