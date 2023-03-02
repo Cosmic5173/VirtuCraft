@@ -16,12 +16,14 @@
 package dev.virtucraft.virtucraft;
 
 import dev.virtucraft.virtucraft.logger.MainLogger;
+import lombok.Getter;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public final class Server {
 
+    @Getter
     private static Server instance;
 
     private final Path dataPath;
