@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package dev.virtucraft.virtucraft.logger;
+package dev.virtucraft.virtucraft.utils.text;
 
 import org.fusesource.jansi.Ansi;
 
