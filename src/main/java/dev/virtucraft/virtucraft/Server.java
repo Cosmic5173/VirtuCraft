@@ -16,6 +16,7 @@
 package dev.virtucraft.virtucraft;
 
 import dev.virtucraft.virtucraft.logger.MainLogger;
+import dev.virtucraft.virtucraft.utils.config.ConfigurationManager;
 import lombok.Getter;
 
 import java.nio.file.Path;
@@ -34,6 +35,9 @@ public final class Server {
     @Getter
     private final MainLogger logger;
 
+    @Getter
+    private final ConfigurationManager configurationManager;
+
     private boolean shutdown = false;
 
     public Server(MainLogger logger, String filePath, String pluginPath) {
@@ -41,6 +45,8 @@ public final class Server {
         this.logger = logger;
         this.dataPath = Paths.get(filePath);
         this.pluginPath = Paths.get(pluginPath);
+
+        this.configurationManager = new ConfigurationManager(this);
     }
 
     public void shutdown() {
