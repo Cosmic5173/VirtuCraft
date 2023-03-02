@@ -33,7 +33,7 @@ public final class VirtuCraft {
         System.setProperty("log4j.skipJansi", "false");
 
         var logger = MainLogger.getLogger();
-        logger.info("Starting VirtuCraft server  software!");
+        logger.info("Starting VirtuCraft server software!");
         logger.info("Software Version: " + versionInfo.baseVersion());
         logger.info("Software Build: " + versionInfo.buildVersion());
         logger.info("Development Build: " + versionInfo.debug());
