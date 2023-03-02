@@ -65,7 +65,7 @@ public final class VirtuCraft {
         }
     }
 
-    private static void onShutdown() {
+    public static void onShutdown() {
         LogManager.shutdown();
     }
 

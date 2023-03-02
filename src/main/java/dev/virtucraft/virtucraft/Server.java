@@ -40,6 +40,26 @@ public final class Server {
         this.pluginPath = Paths.get(pluginPath);
     }
 
+    public void shutdown() {
+        if (this.shutdown) {
+            return;
+        }
+        this.shutdown = true;
+
+        try {
+            this.shutdown0();
+        } catch (Exception e) {
+            this.logger.error("Unable to shutdown server gracefully", e);
+        } finally {
+            VirtuCraft.onShutdown();
+        }
+
+    }
+
+    private void shutdown0() throws Exception {
+
+    }
+
     public boolean isRunning() {
         return !shutdown;
     }
