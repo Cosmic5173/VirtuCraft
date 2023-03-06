@@ -15,6 +15,13 @@
 
 package dev.virtucraft.virtucraft;
 
+import com.google.common.base.Preconditions;
+import dev.virtucraft.virtucraft.command.Command;
+import dev.virtucraft.virtucraft.command.CommandSender;
+import dev.virtucraft.virtucraft.command.ConsoleCommandSender;
+import dev.virtucraft.virtucraft.command.map.CommandMap;
+import dev.virtucraft.virtucraft.command.map.SimpleCommandMap;
+import dev.virtucraft.virtucraft.command.utils.CommandUtils;
 import dev.virtucraft.virtucraft.logger.MainLogger;
 import dev.virtucraft.virtucraft.utils.config.ConfigurationManager;
 import dev.virtucraft.virtucraft.utils.config.LangConfig;
@@ -24,6 +31,7 @@ import lombok.Getter;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public final class Server {
 
@@ -41,6 +49,11 @@ public final class Server {
     @Getter
     private final ConfigurationManager configurationManager;
 
+    @Getter
+    private CommandMap commandMap;
+    @Getter
+    private final ConsoleCommandSender consoleCommandSender;
+
     private boolean shutdown = false;
 
     public Server(MainLogger logger, String filePath, String pluginPath) throws Exception {
@@ -52,6 +65,9 @@ public final class Server {
         this.configurationManager = new ConfigurationManager(this);
         this.configurationManager.loadServerConfig();
         this.configurationManager.loadLanguageConfig();
+
+        this.consoleCommandSender = new ConsoleCommandSender(this);
+        this.commandMap = new SimpleCommandMap(this, SimpleCommandMap.DEFAULT_PREFIX);
     }
 
     public void shutdown() {
@@ -78,12 +94,45 @@ public final class Server {
         return this.getLanguageConfig().translateContainer(textContainer);
     }
 
+    public boolean dispatchCommand(CommandSender sender, String message) {
+        if (message.trim().isEmpty()) {
+            return false;
+        }
+
+        String[] args = message.split(" ");
+        if (args.length < 1) {
+            return false;
+        }
+
+        Command command = this.getCommandMap().getCommand(args[0]);
+        if (command == null)  {
+            return false;
+        }
+
+        String[] shiftedArgs;
+        if (command.getSettings().isQuoteAware()) { // Quote aware parsing
+            var arguments = CommandUtils.parseArguments(message);
+            arguments.remove(0);
+            shiftedArgs = arguments.toArray(String[]::new);
+        } else {
+            shiftedArgs = args.length > 1 ? Arrays.copyOfRange(args, 1, args.length) : new String[0];
+        }
+
+        // TODO: Event system: call command event
+        return this.commandMap.handleCommand(sender, args[0], shiftedArgs);
+    }
+
     public ServerConfig getConfiguration() {
         return this.configurationManager.getServerConfig();
     }
 
     public LangConfig getLanguageConfig() {
         return this.configurationManager.getLangConfig();
+    }
+
+    public void setCommandMap(CommandMap commandMap) {
+        Preconditions.checkNotNull(commandMap, "Command Map cannot be null");
+        this.commandMap = commandMap;
     }
 
     public boolean isRunning() {
