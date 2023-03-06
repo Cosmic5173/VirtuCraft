@@ -16,13 +16,14 @@
 package dev.virtucraft.virtucraft.command;
 
 import dev.virtucraft.virtucraft.utils.text.TranslationContainer;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 /**
  * A container holding base information of each command
  */
-@Builder @Getter
+@Getter
 public class CommandSettings {
 
     private static final CommandSettings EMPTY_SETTINGS = CommandSettings.builder().build();
@@ -53,13 +54,28 @@ public class CommandSettings {
         return EMPTY_SETTINGS;
     }
 
-    @lombok.Builder
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Getter @Setter @Accessors(fluent = true)
     public static class Builder {
-        private String usageMessage;
-        private String description;
-        private String permission;
-        private String permissionMessage;
-        private String[] aliases;
-        private boolean quoteAware;
+        private String usageMessage = "";
+        private String description = null;
+        private String permission = "";
+        private String permissionMessage = "waterdog.command.permission.failed";
+        private String[] aliases = new String[0];
+        private boolean quoteAware = false;
+
+        public CommandSettings build() {
+            return new CommandSettings(
+                    this.usageMessage,
+                    this.description == null ? this.usageMessage : this.description,
+                    this.permission,
+                    this.aliases,
+                    this.permissionMessage,
+                    this.quoteAware
+            );
+        }
     }
 }
