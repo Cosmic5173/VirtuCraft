@@ -32,6 +32,7 @@ import lombok.Getter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Server {
 
@@ -54,7 +55,13 @@ public final class Server {
     @Getter
     private final ConsoleCommandSender consoleCommandSender;
 
-    private boolean shutdown = false;
+    private int tickCounter;
+    private long nextTick;
+    private final float[] tickAverage = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+    private final float[] useAverage = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    private float maxTick = 20;
+    private float maxUse = 0;
+    private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
     public Server(MainLogger logger, String filePath, String pluginPath) throws Exception {
         instance = this;
@@ -68,22 +75,105 @@ public final class Server {
 
         this.consoleCommandSender = new ConsoleCommandSender(this);
         this.commandMap = new SimpleCommandMap(this, SimpleCommandMap.DEFAULT_PREFIX);
+
+        this.start();
     }
 
-    public void shutdown() {
-        if (this.shutdown) {
-            return;
-        }
-        this.shutdown = true;
+    private void start() {
+        Preconditions.checkState(this.isRunning.get(), "Server is already running");
+        this.tickCounter = 0;
+
+        this.tickProcessor();
 
         try {
             this.shutdown0();
         } catch (Exception e) {
-            this.logger.error("Unable to shutdown server gracefully", e);
-        } finally {
-            VirtuCraft.onShutdown();
+            this.logger.error("Error gracefully shutting down server", e);
+        }
+    }
+
+    private void tickProcessor() {
+        this.nextTick = System.currentTimeMillis();
+        try {
+            while (this.isRunning.get()) {
+                try {
+                    this.tick();
+
+                    var next = this.nextTick;
+                    var current = System.currentTimeMillis();
+
+                    if (next - 0.1 > current) {
+                        var allocated = next - current - 1;
+                        if (allocated > 0) {
+                            Thread.sleep(allocated, 900000);
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    this.logger.logException(e);
+                }
+            }
+        } catch (Throwable e) {
+            this.logger.error("Unexpected error while ticking server", e);
+        }
+    }
+
+    private void tick() {
+        var tickTime = System.currentTimeMillis();
+
+        var time = tickTime - this.nextTick;
+        if (time < -25) {
+            try {
+                Thread.sleep(Math.max(5, -time - 25));
+            } catch (InterruptedException e) {
+               this.logger.logException(e);
+            }
         }
 
+        var tickTimeNano = System.nanoTime();
+        if ((tickTime - this.nextTick) < -25) {
+            return;
+        }
+
+        ++this.tickCounter;
+
+        if ((this.tickCounter & 0b1111) == 0) {
+            this.titleTick();
+            this.maxTick = 20;
+            this.maxUse = 0;
+        }
+
+        long nowNano = System.nanoTime();
+        float tick = (float) Math.min(20, 1000000000 / Math.max(1000000, ((double) nowNano - tickTimeNano)));
+        float use = (float) Math.min(1, ((double) (nowNano - tickTimeNano)) / 50000000);
+
+        if (this.maxTick > tick) {
+            this.maxTick = tick;
+        }
+
+        if (this.maxUse < use) {
+            this.maxUse = use;
+        }
+
+        System.arraycopy(this.tickAverage, 1, this.tickAverage, 0, this.tickAverage.length - 1);
+        this.tickAverage[this.tickAverage.length - 1] = tick;
+
+        System.arraycopy(this.useAverage, 1, this.useAverage, 0, this.useAverage.length - 1);
+        this.useAverage[this.useAverage.length - 1] = use;
+
+        if ((this.nextTick - tickTime) < -1000) {
+            this.nextTick = tickTime;
+        } else {
+            this.nextTick += 50;
+        }
+    }
+
+    private void titleTick() {
+        // TODO: Implement title tick
+        // This appears on the console window. We should show info on tick rate, memory usage, network, players, etc.
+    }
+
+    public void shutdown() {
+        this.isRunning.getAndSet(false);
     }
 
     private void shutdown0() throws Exception {
@@ -136,6 +226,6 @@ public final class Server {
     }
 
     public boolean isRunning() {
-        return !shutdown;
+        return this.isRunning.get();
     }
 }
